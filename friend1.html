@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend 1's Videos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #121212;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .video-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .video {
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 560px;
+            position: relative;
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        iframe {
+            width: 100%;
+            height: 315px;
+            border: none;
+        }
+
+        .full-screen-button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .full-screen-button:hover {
+            background-color: #218838;
+        }
+
+        .comments-section {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 560px;
+        }
+
+        #commentInput {
+            width: calc(100% - 24px);
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        #commentButton {
+            background-color: #28a745;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        #commentButton:hover {
+            background-color: #218838;
+        }
+
+        .comment {
+            background-color: #444;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .comment:hover {
+            background-color: #555;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+        }
+
+        .home-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Friend 1's Videos</h1>
+    
+    <div class="video-container">
+        <div class="video">
+            <iframe id="video" src="https://www.youtube.com/embed/AAuX-of03qY?controls=0" title="YouTube video player" allowfullscreen></iframe>
+        </div>
+        <button class="full-screen-button" id="fullScreenButton">Toggle Full Screen</button>
+        <div class="comments-section">
+            <h2>Comments</h2>
+            <input type="text" id="commentInput" placeholder="Leave a comment..." />
+            <button id="commentButton">Post Comment</button>
+            <div id="commentsDisplay"></div>
+        </div>
+        <a href="index.html" class="home-button">Home</a>
+    </div>
+
+    <script>
+        const loadComments = () => {
+            const comments = JSON.parse(localStorage.getItem('friend1_comments')) || [];
+            const commentsDisplay = document.getElementById('commentsDisplay');
+            commentsDisplay.innerHTML = '';
+
+            comments.forEach((comment, index) => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+                commentDiv.textContent = comment.text;
+
+                // Show delete button only for logged-in admins
+                if (localStorage.getItem('isAdmin') === 'true') {
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-button';
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.onclick = () => {
+                        comments.splice(index, 1); // Remove comment
+                        localStorage.setItem('friend1_comments', JSON.stringify(comments));
+                        loadComments(); // Refresh the comments display
+                    };
+                    commentDiv.appendChild(deleteButton);
+                }
+
+                commentsDisplay.appendChild(commentDiv);
+            });
+        };
+
+        document.getElementById('commentButton').addEventListener('click', () => {
+            const commentInput = document.getElementById('commentInput');
+            if (commentInput.value.trim() === '') {
+                alert('Please enter a comment.');
+                return;
+            }
+            const comments = JSON.parse(localStorage.getItem('friend1_comments')) || [];
+            comments.push({ text: commentInput.value });
+            localStorage.setItem('friend1_comments', JSON.stringify(comments));
+            commentInput.value = ''; // Clear input field
+            loadComments(); // Refresh comments display
+        });
+
+        // Full screen functionality
+        document.getElementById('fullScreenButton').addEventListener('click', () => {
+            const video = document.getElementById('video');
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) { // Firefox
+                video.mozRequestFullScreen();
+            } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) { // IE/Edge
+                video.msRequestFullscreen();
+            }
+        });
+
+        loadComments(); // Load comments on page load
+    </script>
+</body>
+</html>
